@@ -10,6 +10,22 @@ typedef struct
 } labeldata;
 
 static void
+dynamic_read(char **text, size_t *size, FILE * fp)
+{
+        char ch = 0;
+        for (int i = 0; ch != EOF; i++) {
+                ch = (char)fgetc(fp);
+                if (ch > 0 ) {
+                        if (i == *size) {
+                                *size *= 2;
+                                *text = realloc(*text, *size);
+                        }
+                        (*text)[i] = ch;
+                }
+        }
+}
+
+static void
 get_fortune (labeldata * data)
 {
         GtkLabel *label = data->label;
@@ -19,17 +35,7 @@ get_fortune (labeldata * data)
 
         memset(*quote, 0, *size);
         if (fp != NULL) {
-                char ch = 0;
-                for (int i = 0; ch != EOF; i++) {
-                        ch = (char)fgetc(fp);
-                        if (ch > 0 ) {
-                                if (i == *size) {
-                                        *size *= 2;
-                                        *quote = realloc(*quote, *size);
-                                }
-                                (*quote)[i] = ch;
-                        }
-                }
+                dynamic_read(quote, size, fp);
                 gtk_label_set_text(label, *quote);
         } else {
                 gtk_label_set_text(label, "Please install fortune-mod");
