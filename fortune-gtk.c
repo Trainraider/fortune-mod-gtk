@@ -2,7 +2,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 
-typedef struct 
+typedef struct
 {
         GtkLabel * label;
         char * text;
@@ -11,20 +11,29 @@ typedef struct
 
 static void
 get_fortune (labeldata * data)
-{       
+{
         GtkLabel *label = data->label;
-        char * quote = data->text;
-        size_t size = data->size;
+        char ** quote = &(data->text);
+        size_t * size = &(data->size);
         FILE *fp = popen("fortune", "r");
-        
-        memset(quote, 0, size);
+
+        memset(*quote, 0, *size);
         if (fp != NULL) {
-                fread(quote, 1, size, fp);
-                gtk_label_set_text(label, quote);
+                char ch = 0;
+                for (int i = 0; ch != EOF; i++) {
+                        ch = (char)fgetc(fp);
+                        if (ch > 0 ) {
+                                if (i == *size) {
+                                        *size *= 2;
+                                        *quote = realloc(*quote, *size);
+                                }
+                                (*quote)[i] = ch;
+                        }
+                }
+                gtk_label_set_text(label, *quote);
         } else {
                 gtk_label_set_text(label, "Please install fortune-mod");
         }
-
         pclose(fp);
 }
 
@@ -39,12 +48,11 @@ activate (GtkApplication* app,
         GtkWidget *box = gtk_box_new(GTK_ORIENTATION_VERTICAL, 16);
 
         GtkWidget *label = gtk_label_new("");
-        labeldata * dptr = (labeldata *)user_data;
-        dptr->label = GTK_LABEL(label);
-        get_fortune(dptr);
+        ((labeldata *)user_data)->label = GTK_LABEL(label);
+        get_fortune((labeldata *)user_data);
 
         GtkWidget *button = gtk_button_new_with_label("New Quote");
-        g_signal_connect_swapped(button, "clicked", G_CALLBACK(get_fortune), dptr);
+        g_signal_connect_swapped(button, "clicked", G_CALLBACK(get_fortune), (gpointer)user_data);
 
         gtk_container_add(GTK_CONTAINER(window), box);
         gtk_container_add(GTK_CONTAINER(box), button);
@@ -60,9 +68,9 @@ main (int    argc,
         GtkApplication *app;
         int status;
 
-        size_t size = 2048;
-        char quote[size];
-        memset(quote, 0, size);
+        size_t size = 16;
+        char * quote = calloc(size, sizeof(char));
+
         labeldata data = {NULL, quote, size};
         labeldata * dptr = &data;
 
@@ -70,6 +78,7 @@ main (int    argc,
         g_signal_connect (app, "activate", G_CALLBACK (activate), (gpointer)dptr);
         status = g_application_run (G_APPLICATION (app), argc, argv);
 
+        free(quote);
         g_object_unref (app);
 
         return status;
