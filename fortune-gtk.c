@@ -1,4 +1,5 @@
 #include <gtk/gtk.h>
+#include <stdbool.h>
 #include <stdio.h>
 #include <stdlib.h>
 
@@ -54,6 +55,7 @@ activate(GtkApplication* app,
         GtkWidget* box = gtk_box_new(GTK_ORIENTATION_VERTICAL, 16);
 
         GtkWidget* label = gtk_label_new("");
+        gtk_label_set_selectable(GTK_LABEL(label), true);
         ((labeldata*)user_data)->label = GTK_LABEL(label);
         get_fortune((labeldata*)user_data);
 
