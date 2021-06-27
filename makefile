@@ -19,4 +19,7 @@ clean :
 .PHONY : debug
 debug : $(objects)
 	$(CC) $(CFLAGS) -O0 -g -Wall -Wpedantic -o fortune-gtk $(objects) `pkg-config --libs gtk+-3.0`
-	
+
+.PHONY : format
+format :
+	clang-format -style="{BasedOnStyle: webkit, IndentWidth: 8}" -i *.{c,h}
