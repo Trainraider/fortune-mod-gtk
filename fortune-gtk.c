@@ -49,8 +49,18 @@ activate(GtkApplication* app,
     gpointer user_data)
 {
         GtkWidget* window = gtk_application_window_new(app);
-        gtk_window_set_title(GTK_WINDOW(window), "Fortune");
+        //gtk_window_set_title(GTK_WINDOW(window), "Fortune");
         gtk_window_set_default_size(GTK_WINDOW(window), 200, 200);
+
+        GtkWidget* menu_button = gtk_button_new ();
+        GtkWidget* menu_image = gtk_image_new_from_icon_name ("open-menu-symbolic", GTK_ICON_SIZE_BUTTON);
+        gtk_container_add(GTK_CONTAINER (menu_button), menu_image);
+
+        GtkWidget* header = gtk_header_bar_new();
+        gtk_header_bar_set_title(GTK_HEADER_BAR(header), "Fortune");
+        gtk_header_bar_set_has_subtitle(GTK_HEADER_BAR(header), false);
+        gtk_header_bar_set_show_close_button(GTK_HEADER_BAR(header), true);
+        gtk_header_bar_pack_start (GTK_HEADER_BAR (header), menu_button);
 
         GtkWidget* box = gtk_box_new(GTK_ORIENTATION_VERTICAL, 16);
 
@@ -62,6 +72,7 @@ activate(GtkApplication* app,
         GtkWidget* button = gtk_button_new_with_label("New Quote");
         g_signal_connect_swapped(button, "clicked", G_CALLBACK(get_fortune), (gpointer)user_data);
 
+        gtk_window_set_titlebar(GTK_WINDOW(window), header);
         gtk_container_add(GTK_CONTAINER(window), box);
         gtk_container_add(GTK_CONTAINER(box), button);
         gtk_container_add(GTK_CONTAINER(box), label);
